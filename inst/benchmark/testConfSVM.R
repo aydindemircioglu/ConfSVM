@@ -57,7 +57,7 @@ getConfScaling = function (model, svm.model, data, labels = NULL, kappa = 1, tau
 #	model = "williams"
 	doPlot = FALSE
 	
-	N = 100
+	N = 1000
 
 	# but we take here cost = 4 -->  0.94 = 0.06 error
 	gamma = 3.125
@@ -67,7 +67,7 @@ getConfScaling = function (model, svm.model, data, labels = NULL, kappa = 1, tau
 
 	# confscaling parameters
 	kappa = 0.11
-	tau = 0.25
+	tau = 0.2
 
 	set.seed(43)
 
