@@ -7,5 +7,5 @@
 #' @import methods
 #' @import checkmate
 #' @importFrom BBmisc suppressAll
-#' @useDynLib SwarmSVM
+#' @useDynLib ConfSVM
 NULL

@@ -1,4 +1,4 @@
-Package: SwarmSVM
+Package: ConfSVM
 Title: Ensemble Learning Algorithms Based on Support Vector Machines
 Version: 0.1
 Date: 2015-05-27

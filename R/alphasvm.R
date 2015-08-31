@@ -478,7 +478,7 @@ function (x,
                   ctotal2  = double   (1),
                   error    = err,
   
-                  PACKAGE = "SwarmSVM")
+                  PACKAGE = "ConfSVM")
     }, mute = mute)
 
     if (cret$error != empty_string)
@@ -734,7 +734,7 @@ function (object, newdata,
                dec = double(nrow(newdata) * object$nclasses * (object$nclasses - 1) / 2),
                prob = double(nrow(newdata) * object$nclasses),
 
-               PACKAGE = "SwarmSVM"
+               PACKAGE = "ConfSVM"
                )
 
     ret2 <- if (is.character(object$levels)) # classification: return factors
@@ -1016,7 +1016,7 @@ function (object, svm.file="Rdata.svm", scale.file = "Rdata.scale",
                ## filename
                as.character(svm.file),
 
-               PACKAGE = "SwarmSVM"
+               PACKAGE = "ConfSVM"
                )$ret
 
     utils::write.table(data.frame(center = object$x.scale$"scaled:center",

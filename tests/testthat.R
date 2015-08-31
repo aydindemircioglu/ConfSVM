@@ -1,4 +1,4 @@
 library(testthat)
-library(SwarmSVM)
+library(ConfSVM)
 
-test_check("SwarmSVM")
+test_check("ConfSVM")

@@ -19,7 +19,8 @@ alphasvm(x, ...)
   1/ncol(x), coef0 = 0, cost = 1, nu = 0.5, class.weights = NULL,
   cachesize = 40, tolerance = 0.001, epsilon = 0.1, shrinking = TRUE,
   cross = 0, probability = FALSE, fitted = TRUE, alpha = NULL,
-  mute = TRUE, ..., subset, na.action = stats::na.omit)
+  mute = TRUE, confscaling = NULL, ..., subset,
+  na.action = stats::na.omit)
 
 \method{print}{alphasvm}(x, ...)
 
