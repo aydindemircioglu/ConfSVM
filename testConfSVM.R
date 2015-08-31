@@ -1,4 +1,6 @@
-	
+
+library(ConfSVM)
+
 	model = "1999"
 	doPlot = FALSE
 	

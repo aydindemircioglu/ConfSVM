@@ -3,6 +3,8 @@
 #' predic function for convsvm
 #'
 #' @param  model		model to use
+#'
+#' @export
 confSVMPredict = function (model = "1999", gamma = 3.125, cost = 1, 
 	train.x = NULL, train.y = NULL, ...) {
 	

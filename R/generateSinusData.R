@@ -1,4 +1,7 @@
 
+#' generate sinus data
+#'
+#' @export
 generateSinusData = function (N = 1000) {
   x = matrix( runif(2*N, min = -1, max = 1), ncol = 2)
   y = as.numeric(x[,2] < sin (pi*x[,1]))
@@ -7,7 +10,10 @@ generateSinusData = function (N = 1000) {
 }
 
 
-plotData = function (d) {
+#' generate and plot sinus data
+#'
+#' @export
+plotSinusData = function (d) {
   library(ggplot2)
   
   d = generateSinusData (1000)
