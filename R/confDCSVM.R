@@ -69,6 +69,9 @@ confDCSVM = function(x, y, k = 4, m, kernel = 3, max.levels,
                  cluster.method = 'kmeans', 
                  cluster.fun = NULL, cluster.predict = NULL, ...) {
   
+  # TODO: check for confSVM parameter
+  confScalingMethod = "1999"
+
   # parameter check
   if (!testNull(seed))
     set.seed(seed)
@@ -237,7 +240,7 @@ confDCSVM = function(x, y, k = 4, m, kernel = 3, max.levels,
           verbose = verbose)
   time.point = proc.time()
   assertInt(early, lower = 0, upper = max.levels)
-  
+
   # SVM train
   for (lvl in max.levels:1) {
     assertLogical(support, len = n)
@@ -256,10 +259,12 @@ confDCSVM = function(x, y, k = 4, m, kernel = 3, max.levels,
       if (length(ind)>1) {
         # train the svm with given support vectors
         if (lvl == max.levels || sum(support[ind])==0) {
-          svm.model = alphasvm(x = x[ind,], y = y[ind], kernel = svm.kernel, confscaling = confScaling, ...)
+          svm.model = alphasvm(x = x[ind,], y = y[ind], kernel = svm.kernel, 
+		confscaling = confScaling[ind,], ...)
         } else {
-          svm.model = alphasvm(x = x[ind,], y = y[ind], kernel = svm.kernel, confscaling = confScaling, 
-                               alpha = alpha[ind,], ...)
+          svm.model = alphasvm(x = x[ind,], y = y[ind], kernel = svm.kernel, 
+		confscaling = confScaling[ind,], 
+                alpha = alpha[ind,], ...)
         }
         svm.models[[clst]] = svm.model
         sv.ind = ind[svm.model$index]
@@ -269,13 +274,9 @@ confDCSVM = function(x, y, k = 4, m, kernel = 3, max.levels,
         }
       }
       # update conformal scaling
-      # each x in training set has 
-      M = lenght(sv.ind)
-      tau = rep(1, M)
-      for (i in 1:M) {
-        tau[i]
-        confscaling[i] = 1  # FIXME
-      }
+      localConfScaling = getConfScaling (confScalingMethod, svm.model, newsvm.model$SV, 
+		kappa = kappa, tau = tau)
+      confScaling [ind] = localConfScaling
     }
     support = new.support
     alpha = new.alpha
@@ -286,7 +287,8 @@ confDCSVM = function(x, y, k = 4, m, kernel = 3, max.levels,
   if (early == 0){
     # Refine
     ind = which(support)
-    svm.models = alphasvm(x = x[ind,], y = y[ind], kernel = svm.kernel, confscaling = confScaling, 
+    svm.models = alphasvm(x = x[ind,], y = y[ind], kernel = svm.kernel, 
+			confscaling = confScaling[ind], 
                           alpha = alpha[ind,], ...)
     if (final.training) {
       sv.ind = ind[svm.models$index]
@@ -295,7 +297,7 @@ confDCSVM = function(x, y, k = 4, m, kernel = 3, max.levels,
       
       # Final
       svm.models = alphasvm(x = x, y = y, kernel = svm.kernel, alpha = alpha, 
-		confscaling = confScaling, ...)
+			confscaling = confScaling, ...)
     }
   }
   svm.time = (proc.time()-time.point)[3]

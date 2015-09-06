@@ -5,13 +5,9 @@
 #'
 #' @export
 confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1, 
-	train.x = NULL, train.y = NULL, ...) {
+	train.x = NULL, train.y = NULL, kappa = 0.1, tau = 0.1, ...) {
 	
 	doPlot = FALSE
-	
-	# confscaling parameters
-	kappa = 0.11
-	tau = 0.25
 	
 	
 	## first round of computations, can/will use the normal SVM

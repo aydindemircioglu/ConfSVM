@@ -12,19 +12,24 @@ library(ConfSVM)
 	
 	# confscaling parameters
 	kappa = 0.11
-	tau = 0.25
+	tau = 0.4
 
 	set.seed(43)
+	
+	### covtype
+	library(SVMBridge)
+	covtype = readSparseData (file = "./tmp/codrna")
+	covtype$X = covtype$X[1:50000,]
+	covtype$Y = covtype$Y[1:50000,]
 
-	# generate data
-	d = generateSinusData(N)
-	train.x = d$x
-	train.y = as.factor(d$y)
+	trainInd =  sample (seq_len(nrow(covtype$X)), size = floor (0.75*nrow(covtype$X)))
 
-	d = generateSinusData(N)
-	test.x = d$x
-	test.y = as.factor(d$y)
+	train.x = covtype$X[trainInd,]
+	train.y = as.factor(covtype$Y[trainInd])
+	
+	test.x = covtype$X[-trainInd,]
+	test.y = as.factor(covtype$Y[-trainInd])
 
 	confSVMTrain (model = model, gamma = gamma, train.x = train.x, train.y = train.y,
-		test.x = test.x, test.y = test.y)
+		test.x = test.x, test.y = test.y, kappa = kappa, tau = tau)
 	
