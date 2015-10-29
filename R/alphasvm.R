@@ -244,7 +244,7 @@ function (x,
       if (nlvl>16) 
         stop("Only classification missions with no more than 16 target classes are allowed.")
     }
-    assertFactor(y, len = nrow(x), max.levels = 16)
+    assertFactor(y, len = nrow(x))
 
     # determine model type
     if (is.null(type)) type <-

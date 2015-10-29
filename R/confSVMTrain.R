@@ -7,7 +7,17 @@
 confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1, 
 	train.x = NULL, train.y = NULL, kappa = 0.1, tau = 0.1, ...) {
 	
-	doPlot = FALSE
+	doPlot = TRUE
+	doTest = TRUE
+	doCondNumber = FALSE
+	
+	if (doCondNumber== TRUE) {
+		library(kernlab)
+		rbf <- rbfdot (sigma = gamma)
+		k_ij = kernelMatrix(rbf, train.x)
+		s = svd(k_ij)
+		plot(s$d, main = sprintf("before, k: %f", kappa(k_ij)))
+	}
 	
 	
 	## first round of computations, can/will use the normal SVM
@@ -27,11 +37,25 @@ confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1,
 	if (is.null(confScaling) == TRUE)
 		stop ("Sorry, no confscaling selected.")
 
-		
+	# scale each train.x instead of modifying the kernel
+	tmpX = train.x
+	for (i in 1:nrow(train.x)) {
+		tmpX[i,] = tmpX[i,] * confScaling[i]
+	}
+	
+	if (doCondNumber == TRUE) {
+		rbf <- rbfdot (sigma = gamma)
+		khat_ij = as.matrix(kernelMatrix(rbf, tmpX))
+		shat = svd(khat_ij)
+		X11()
+		plot(shat$d, main = sprintf("after, k: %f", kappa(khat_ij)))
+	}
+	
 		
 	## plotting conformal scaling
 	cat ("\n\n### plotting conformal scaling.\n")
 	if (doPlot == TRUE) {
+	  library(ggplot2)
 		# TODO: adapt grid size to data.
 		plotdata = expand.grid(x=seq(-1,1,0.1), y= seq(-1,1,0.1))
 	#	  plotdata = expand.grid(x=seq(-2,2,0.05), y= seq(-2,2,0.05))

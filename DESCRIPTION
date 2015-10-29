@@ -12,10 +12,9 @@ Imports:
     e1071,
     LiblineaR,
     Matrix,
-    SparseM,
     kernlab,
     methods,
-    checkmate (>= 1.6.0),
+    checkmate (>= 1.3.0),
     BBmisc
 License: GPL-2
 Suggests: testthat, knitr, rmarkdown
