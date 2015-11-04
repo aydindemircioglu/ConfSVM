@@ -3,7 +3,7 @@ devtools::load_all(".")
 #library(ConfSVM)
 
 #X11()
-	model = "1999"
+	model = "williams"
 	doPlot = FALSE
 	
 	N = 100

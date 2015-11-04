@@ -5,9 +5,9 @@
 #'
 #' @export
 confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1, 
-	train.x = NULL, train.y = NULL, kappa = 0.1, tau = 0.1, ...) {
+	train.x = NULL, train.y = NULL, kappa = 0.1, tau = 0.1, verbose = TRUE, ...) {
 	
-	doPlot = TRUE
+	doPlot = FALSE
 	doTest = TRUE
 	doCondNumber = FALSE
 	
@@ -21,27 +21,34 @@ confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1,
 	
 	
 	## first round of computations, can/will use the normal SVM
-	cat ("\n\n### first round.\n")
+	if (verbose == TRUE) {
+		cat ("\n### Calling normal SVM to obtain approximation of decision boundary.\n")
+	}
 	svm.model = alphasvm(x = train.x, y = train.y, gamma = gamma, 
 						cost = cost, probability = FALSE, type = "C-classification")
+						
+	# if we have a test set, we compute its accuracy
 	if (is.null(test.x) == FALSE) {
 		scores = predict(svm.model, test.x, decision.values = TRUE)
 		accuracy = sum(diag(table(scores, test.y)))/length(test.y)
-		cat (" -- Accuracy of first round on test set: ", accuracy)
+		cat (" -- Accuracy of SVM on test set: ", accuracy)
 	}
 
 	
 	## compute conformal scaling
-	cat ("\n\n### computing conformal scaling.\n")
+	if (verbose == TRUE) {
+		cat ("\n### Computing conformal scaling with ", model, " model.\n")
+	}
+	# compute the conformal scaling on the whole training set
 	confScaling = getConfScaling(model, svm.model, train.x, train.y, kappa = kappa, tau = tau)
 	if (is.null(confScaling) == TRUE)
 		stop ("Sorry, no confscaling selected.")
 
-	# scale each train.x instead of modifying the kernel
-	tmpX = train.x
-	for (i in 1:nrow(train.x)) {
-		tmpX[i,] = tmpX[i,] * confScaling[i]
-	}
+	# scale each train.x instead of modifying the kernel -- was ist das fuern quatsch?
+# 	tmpX = train.x
+# 	for (i in 1:nrow(train.x)) {
+# 		tmpX[i,] = tmpX[i,] * confScaling[i]
+# 	}
 	
 	if (doCondNumber == TRUE) {
 		rbf <- rbfdot (sigma = gamma)
@@ -53,8 +60,10 @@ confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1,
 	
 		
 	## plotting conformal scaling
-	cat ("\n\n### plotting conformal scaling.\n")
 	if (doPlot == TRUE) {
+	  if (verbose == TRUE)
+	    cat ("\n### Plotting conformal scaling.\n")
+	  
 	  library(ggplot2)
 		# TODO: adapt grid size to data.
 		plotdata = expand.grid(x=seq(-1,1,0.1), y= seq(-1,1,0.1))
@@ -80,23 +89,26 @@ confSVMTrain = function (model = "1999", gamma = 3.125, cost = 1,
 	}	
 
 	
-	## compute conformal scaling on test set
-	cat ("\n\n### computing conformal scaling.\n")
-	
 	
 	# compute scaling on test set 
 	if (is.null(test.x) == FALSE) {
-		testScaling = getConfScaling(model, svm.model, test.x, kappa = kappa, tau = tau)
+	  
+	  ## compute conformal scaling on test set
+	  if (verbose == TRUE)
+	    cat ("\n### Computing conformal scaling on test set.\n")
+	  testScaling = getConfScaling(model, svm.model, test.x, kappa = kappa, tau = tau)
 	}
 
+	
 	# second round of computations, can/will use the normal SVM
+	if (verbose == TRUE)
+	  cat ("\n### Training conformally scaled SVM\n")
 	newsvm.model = alphasvm(x = train.x, y = train.y, gamma = gamma, 
 						confscaling = confScaling, fitted = FALSE,
 						cost = cost, probability = FALSE)
 
 	# need now the confscaling (from the first round) ON the new supportvectors
-	# as the kernel is the old kernel.
-
+	# as the kernel is the old kernel. confScaling is now the size of the SVs of the second model.
 	confScaling = getConfScaling(model, svm.model, newsvm.model$SV, kappa = kappa, tau = tau)
 
 	if (is.null(test.x) == FALSE) {
