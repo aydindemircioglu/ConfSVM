@@ -43,7 +43,7 @@ if (1 == 0) {
 	time.confDC = microbenchmark (
 	  confDCSVMTrain (confScalingModel = model, gamma = gamma, x = train.x, y = train.y, m = 5000,
 	  	valid.x = test.x, valid.y = test.y, kappa = kappa, tau = tau,
-		  pre.scale = FALSE, k = 6, max.levels = 4, early = 2),
+		  pre.scale = FALSE, k = 6, max.levels = 2, early = 2),
 	times = 1)
 
 	print (time.conf)

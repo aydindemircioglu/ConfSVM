@@ -77,12 +77,12 @@ confDCSVMTrain = function(x, y, k = 4, m, kernel = 3, max.levels,
   }
 
   # parameter check
-  if (!testNull(seed))
+  if (!checkmate::testNull(seed))
     set.seed(seed)
   
   assertInt(nrow(x), lower = 1)
   assertInt(ncol(x), lower = 1)
-  if (testClass(x, "data.frame"))
+  if (checkmate::testClass(x, "data.frame"))
     x = data.matrix(x)
   assertVector(y, len = nrow(x))
   
@@ -92,7 +92,7 @@ confDCSVMTrain = function(x, y, k = 4, m, kernel = 3, max.levels,
     m = n
   }
   
-  if (testNull(cluster.fun) && testNull(cluster.predict)) {
+  if (checkmate::testNull(cluster.fun) && checkmate::testNull(cluster.predict)) {
     assertCharacter(cluster.method)
     if (cluster.method == 'kmeans') {
       cluster.fun = stats::kmeans
@@ -364,83 +364,3 @@ confDCSVMTrain = function(x, y, k = 4, m, kernel = 3, max.levels,
   return(result)
 }
 
-#' 
-#' Predictions with Divide-Conquer Support Vector Machines
-#' 
-#' The function applies a model produced by the 
-#'  \code{dcSVM} function to every row of a data matrix and returns the model predictions.
-#' 
-#' @param object Object of class "dcSVM", created by \code{dcSVM}.
-#' @param newdata An n x p matrix containing the new input data. Could be a matrix or a sparse matrix object.
-#' @param ... other parameters passing to \code{predict.svm}
-#' 
-#' @method predict dcSVM
-#' 
-#' @note confscaling is actually part of the model, so we do not need to pass it 
-#' 
-#' @export
-#' 
-confDCSVMTest = function(object, newdata,
-	probability = FALSE,
-	...) {
-  
-  checkmate::assertClass(object, 'dcSVM')
-  
-  if (missing(newdata))
-    return(fitted(object$svm))
-  
-  # assertMatrix(newdata, min.rows = 1)
-  assertInt(nrow(newdata), lower = 1)
-  assertInt(ncol(newdata), lower = 1)
-  if (testClass(newdata, "data.frame"))
-    newdata = data.matrix(newdata)
-  scale.info = object$scale
-  if (!testNull(scale.info$scale)) {
-    assertInteger(scale.info$scale)
-    newdata[, scale.info$scale] = scaleBySD(newdata[, scale.info$scale],
-                                            scale.info$x.scale)
-  }
-  
-  # Assign label
-  if (object$early > 0) {
-    new.result = rep(1, nrow(newdata))
-    for (i in 1:object$early) {
-      #i = object$early
-      cluster.object.list = object$cluster.tree[[i]]
-      new.label = rep(0,nrow(newdata))
-      k = 0
-      for (cid in 1:length(cluster.object.list)) {
-        ind = which(new.result == cid)
-        if (length(ind) > 0) {
-          new.label[ind] = k + object$cluster.predict(newdata[ind,, drop = FALSE], 
-                                                  cluster.object.list[[cid]])
-          k = max(new.label[ind])
-        }
-      }
-      new.result = new.label
-    }
-    # new.result = object$cluster.predict(newdata,object$cluster.object)
-    k = max(new.result)
-    preds = rep(0, nrow(newdata))
-    for (i in 1:k) {
-      ind = which(new.result == i)
-      if (length(ind)>0) {
-        # we need our confscaling first 
-        XXX
-        confScaling = getConfScaling(confScalingModel, object$svm[[i]], newsvm.model$SV, kappa = kappa, tau = tau)
-        testScaling = getConfScaling(confScalingModel, svm.model, test.x, kappa = kappa, tau = tau)
-
-        preds[ind] = predict.alphasvm(object$svm[[i]], newdata[ind,, drop = FALSE], 
-                                      confScaling = confscaling, 
-                                      testScaling = testscaling, 
-                                      ...)
-      }
-    }
-  } else {
-    preds = predict(object$svm, newdata, 
-		confScaling = confscaling, 
-		testScaling = testscaling, 
-		...)
-  }
-  return(preds)
-}
