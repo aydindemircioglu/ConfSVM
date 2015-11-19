@@ -6,6 +6,8 @@ library(microbenchmark)
 
 # do for all datasets
 
+
+
 # load dataset
 # load best SVM parameters from database
 
@@ -24,23 +26,42 @@ library(microbenchmark)
 	kappa = 10
 	tau = 0.1
 
+	data.path = "~/lab/data/"
+	
 	set.seed(42)
 	
 	library(SVMBridge)
-	dataset = "protein"
-	data = readSparseData (file = paste0("./data/", dataset, ".train"))
-	train.x = data$X
-	train.y = as.factor(data$Y)
-	
-	data = readSparseData (file = paste0("./data/", dataset, ".test"))
-	test.x = data$X
-	test.y = as.factor(data$Y)
-	
-	test.x = test.x [1:5000,]
-	test.y = test.y [1:5000]
-	train.x = train.x [1:5000,]
-	train.y = train.y [1:5000]
 
+	dataset = "ijcnn1/ijcnn1.tr"
+	data = readSparseData (file = file.path (data.path, dataset))
+	train = list (x = data$X, y = as.factor(data$Y))
+	train = scaleData (train, transformation = "LINEAR")
+	train.x = train$x
+	train.y = train$y
+	writeSparseData (X = train.x, Y = train.y, file = "/home/drunkeneye/ijcnn.train")
+	
+	dataset = "ijcnn1/ijcnn1.t"
+	data = readSparseData (file = file.path (data.path, dataset))
+	test = list (x = data$X, y = as.factor(data$Y))
+	test = scaleData (test, transformation = "LINEAR")
+	test.x = test$x
+	test.y = test$y
+	writeSparseData  (X = test.x, Y = test.y, file = "/home/drunkeneye/ijcnn.test")
+	
+# 	print (head(train.x))
+# 	print (head(test.x))
+# 	stop ("A")
+	
+	cat ("### Testing ConfSVM.\n")
+	cost = 2
+	gamma = 2
+	time.conf = microbenchmark (
+	  confSVMTrain (confScalingModel = model, cost = cost, gamma = gamma, train.x = train.x, train.y = train.y,
+		  test.x = test.x, test.y = test.y, kappa = kappa, tau = tau), 
+	times = 1)
+
+stop()	
+	
 if (1 == 0) {	
 	cat ("### Testing ConfSVM.\n")
 	time.conf = microbenchmark (
